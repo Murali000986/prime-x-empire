@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform, AnimatePresence, useSpring } from 'motion/react';
+import { motion, useScroll, useTransform, AnimatePresence, useSpring, useMotionValue } from 'motion/react';
 import { 
   Gamepad2, 
   MessageSquare, 
@@ -219,30 +219,7 @@ const Hero = () => {
           </div>
         </motion.div>
 
-        {/* Floating Icons */}
-        <div className="hidden lg:block">
-          <motion.div 
-            animate={{ y: [0, -20, 0] }}
-            transition={{ duration: 4, repeat: Infinity }}
-            className="absolute top-20 left-10 p-4 glass rounded-2xl"
-          >
-            <Gamepad2 className="text-brand-purple w-8 h-8" />
-          </motion.div>
-          <motion.div 
-            animate={{ y: [0, 20, 0] }}
-            transition={{ duration: 5, repeat: Infinity }}
-            className="absolute bottom-40 left-20 p-4 glass rounded-2xl"
-          >
-            <MessageSquare className="text-brand-blue w-8 h-8" />
-          </motion.div>
-          <motion.div 
-            animate={{ y: [0, -30, 0] }}
-            transition={{ duration: 6, repeat: Infinity }}
-            className="absolute top-40 right-10 p-4 glass rounded-2xl"
-          >
-            <Trophy className="text-yellow-500 w-8 h-8" />
-          </motion.div>
-        </div>
+
       </div>
     </section>
   );
@@ -627,9 +604,36 @@ const Features = () => {
 };
 
 const Stats = () => {
+  const [counts, setCounts] = useState({
+    members: 84, // Fallback
+    online: 51   // Fallback
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('https://discord.com/api/v9/invites/2msTUW4D?with_counts=true');
+        const data = await response.json();
+        if (data.approximate_member_count && data.approximate_presence_count) {
+          setCounts({
+            members: data.approximate_member_count,
+            online: data.approximate_presence_count
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch Discord stats:", error);
+      }
+    };
+
+    fetchStats();
+    // Refresh every 5 minutes
+    const interval = setInterval(fetchStats, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const stats = [
-    { label: "Members Count", value: 5420, suffix: "+" },
-    { label: "Online Users", value: 850, suffix: "+" },
+    { label: "Members Count", value: counts.members, suffix: "+" },
+    { label: "Online Users", value: counts.online, suffix: "+" },
     { label: "Active Events", value: 12, suffix: "" },
     { label: "Server Level", value: 3, suffix: "" }
   ];
@@ -702,25 +706,19 @@ const OverRiser = () => {
       name: "RIZZ",
       id: "rizz",
       avatar: "/rizz.webp",
-      link: "https://discord.com/channels/@me/1442015786745991289",
-      role: "Elite Member",
-      stats: { level: 85, rank: "Immortal" }
+      link: "https://discord.com/channels/@me/1442015786745991289"
     },
     {
       name: "HULK",
       id: "hulk",
       avatar: "/hulk.gif",
-      link: "https://discord.com/channels/@me/1447248571286950122",
-      role: "Admin",
-      stats: { level: 92, rank: "Radiant" }
+      link: "https://discord.com/channels/@me/1447248571286950122"
     },
     {
       name: "VENOM",
       id: "venom",
       avatar: "/venom.webp",
-      link: "https://discord.com/channels/@me/1420720149757165638",
-      role: "Moderator",
-      stats: { level: 78, rank: "Global Elite" }
+      link: "https://discord.com/channels/@me/1420720149757165638"
     }
   ];
 
@@ -764,28 +762,12 @@ const OverRiser = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
                 
                 <div className="absolute bottom-6 left-6 right-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-3xl font-black text-white tracking-tighter">{p.name}</h3>
-                    <div className="px-3 py-1 rounded-full bg-brand-purple/20 border border-brand-purple/30 text-brand-purple text-[10px] font-bold uppercase tracking-widest">
-                      {p.role}
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
-                    <div className="flex-1 text-center py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10">
-                      <p className="text-zinc-500 text-[8px] uppercase font-bold tracking-widest">Level</p>
-                      <p className="text-white font-black">{p.stats.level}</p>
-                    </div>
-                    <div className="flex-1 text-center py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10">
-                      <p className="text-brand-blue text-[8px] uppercase font-bold tracking-widest">Rank</p>
-                      <p className="text-white font-black text-xs">{p.stats.rank}</p>
-                    </div>
-                  </div>
+                  <h3 className="text-3xl font-black text-white tracking-tighter text-center">{p.name}</h3>
                 </div>
               </div>
               
               {/* Overlay Glow */}
-              <div className="absolute inset-0 bg-brand-purple/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+              <div className="absolute inset-0 bg-brand-purple/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             </motion.a>
           ))}
         </div>
@@ -864,16 +846,22 @@ const Footer = () => {
   );
 };
 
-const LoadingScreen = () => {
+const LoadingScreen = ({ onEnter }: { onEnter: () => void }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsVisible(false);
-      document.body.style.overflow = 'auto';
-    }, 2500);
+      setIsReady(true);
+    }, 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleEnter = () => {
+    setIsVisible(false);
+    document.body.style.overflow = 'auto';
+    onEnter();
+  };
 
   return (
     <AnimatePresence>
@@ -881,27 +869,72 @@ const LoadingScreen = () => {
         <motion.div 
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] bg-brand-dark flex flex-col items-center justify-center"
+          className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col items-center justify-center p-6"
         >
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-purple/20 rounded-full blur-[120px] animate-pulse" />
+          </div>
+
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="w-32 h-32 rounded-3xl bg-gradient-to-br from-brand-purple to-brand-blue p-[2px] shadow-2xl shadow-brand-purple/40 mb-8"
+            className="w-32 h-32 rounded-3xl bg-gradient-to-br from-brand-purple to-brand-blue p-[2px] shadow-2xl shadow-brand-purple/40 mb-12 relative z-10"
           >
             <div className="w-full h-full bg-zinc-950 rounded-[22px] overflow-hidden">
               <img src="/image.png" alt="Prime X Empire Logo" className="w-full h-full object-cover animate-pulse" />
             </div>
           </motion.div>
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: 200 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="h-1 bg-brand-purple rounded-full overflow-hidden"
-          >
-            <div className="h-full bg-brand-blue w-full animate-pulse" />
-          </motion.div>
-          <p className="mt-4 text-brand-blue font-bold tracking-[0.3em] text-xs uppercase neon-blue">Loading Empire</p>
+
+          <div className="relative z-10 flex flex-col items-center">
+            <AnimatePresence mode="wait">
+              {!isReady ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center"
+                >
+                  <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden mb-4">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 2, ease: "easeInOut" }}
+                      className="h-full bg-gradient-to-r from-brand-purple to-brand-blue"
+                    />
+                  </div>
+                  <p className="text-brand-blue font-bold tracking-[0.3em] text-[10px] uppercase neon-blue">Initializing Empire</p>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="enter-button"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleEnter}
+                  className="group relative px-12 py-5 rounded-2xl bg-white text-black font-black text-xl shadow-2xl shadow-white/10 overflow-hidden transition-all hover:shadow-brand-purple/40"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    CLICK HERE <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-brand-purple to-brand-blue opacity-0 group-hover:opacity-10 transition-opacity" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+            
+            {isReady && (
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-6 text-zinc-500 font-bold tracking-[0.2em] text-[10px] uppercase"
+              >
+                Enter the Ultimate Gaming Experience
+              </motion.p>
+            )}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -909,12 +942,23 @@ const LoadingScreen = () => {
 };
 
 const CustomCursor = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
   const [isHovering, setIsHovering] = useState(false);
+
+  // Smooth springs for the glowing effects
+  const springConfig = { stiffness: 150, damping: 30, mass: 0.5 };
+  const smoothX = useSpring(mouseX, springConfig);
+  const smoothY = useSpring(mouseY, springConfig);
+
+  // Main cursor point - more responsive
+  const pointX = useSpring(mouseX, { stiffness: 1000, damping: 30 });
+  const pointY = useSpring(mouseY, { stiffness: 1000, damping: 30 });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
       
       const target = e.target as HTMLElement;
       setIsHovering(
@@ -927,56 +971,69 @@ const CustomCursor = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  }, [mouseX, mouseY]);
 
   return (
     <>
       {/* The Neon "Shade" - Large trailing pulsing glow */}
       <motion.div
-        className="fixed top-0 left-0 w-[450px] h-[450px] rounded-full bg-brand-purple/15 blur-[120px] pointer-events-none z-[9998] hidden md:block"
+        className="fixed top-0 left-0 w-[450px] h-[450px] rounded-full bg-brand-purple/10 blur-[100px] pointer-events-none z-[9998] hidden md:block"
+        style={{ 
+          x: smoothX, 
+          y: smoothY,
+          translateX: "-50%",
+          translateY: "-50%"
+        }}
         animate={{ 
-          x: mousePosition.x - 225, 
-          y: mousePosition.y - 225, 
-          scale: isHovering ? 1.4 : [1, 1.1, 1],
-          opacity: [0.3, 0.4, 0.3]
+          scale: isHovering ? 1.2 : [1, 1.05, 1],
+          opacity: [0.2, 0.3, 0.2]
         }}
         transition={{ 
-          x: { type: "spring", stiffness: 40, damping: 25, mass: 0.8 },
-          y: { type: "spring", stiffness: 40, damping: 25, mass: 0.8 },
-          scale: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-          opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+          scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+          opacity: { duration: 4, repeat: Infinity, ease: "easeInOut" }
         }}
       />
 
       {/* Secondary Neon Glow - Closer to center */}
       <motion.div
-        className="fixed top-0 left-0 w-[150px] h-[150px] rounded-full bg-brand-blue/20 blur-[60px] pointer-events-none z-[9998] hidden md:block"
-        animate={{ 
-          x: mousePosition.x - 75, 
-          y: mousePosition.y - 75, 
-          scale: isHovering ? 1.8 : 1
+        className="fixed top-0 left-0 w-[150px] h-[150px] rounded-full bg-brand-blue/15 blur-[60px] pointer-events-none z-[9998] hidden md:block"
+        style={{ 
+          x: smoothX, 
+          y: smoothY,
+          translateX: "-50%",
+          translateY: "-50%"
         }}
-        transition={{ type: "spring", stiffness: 100, damping: 30, mass: 0.5 }}
+        animate={{ 
+          scale: isHovering ? 1.5 : 1
+        }}
       />
       
       {/* The Outer Neon Ring */}
       <motion.div
-        className="fixed top-0 left-0 w-10 h-10 rounded-full border border-brand-blue/60 pointer-events-none z-[9999] hidden md:block"
-        style={{ boxShadow: '0 0 15px rgba(0, 163, 255, 0.4), inset 0 0 10px rgba(0, 163, 255, 0.2)' }}
-        animate={{ 
-          x: mousePosition.x - 20, 
-          y: mousePosition.y - 20,
-          scale: isHovering ? 2.5 : 1,
-          borderColor: isHovering ? 'rgba(168, 85, 247, 0.8)' : 'rgba(0, 163, 255, 0.6)'
+        className="fixed top-0 left-0 w-8 h-8 rounded-full border border-brand-blue/40 pointer-events-none z-[9999] hidden md:block"
+        style={{ 
+          x: pointX, 
+          y: pointY,
+          translateX: "-50%",
+          translateY: "-50%",
+          boxShadow: '0 0 15px rgba(0, 163, 255, 0.3), inset 0 0 10px rgba(0, 163, 255, 0.1)' 
         }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        animate={{ 
+          scale: isHovering ? 2 : 1,
+          borderColor: isHovering ? 'rgba(168, 85, 247, 0.6)' : 'rgba(0, 163, 255, 0.4)'
+        }}
       />
       
       {/* The Center Neon Point */}
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,1),0_0_30px_rgba(168,85,247,0.8)] pointer-events-none z-[9999] hidden md:block"
-        animate={{ x: mousePosition.x - 4, y: mousePosition.y - 4, scale: isHovering ? 0.4 : 1 }}
-        transition={{ type: "spring", stiffness: 1000, damping: 30 }}
+        className="fixed top-0 left-0 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.8),0_0_20px_rgba(168,85,247,0.6)] pointer-events-none z-[9999] hidden md:block"
+        style={{ 
+          x: pointX, 
+          y: pointY,
+          translateX: "-50%",
+          translateY: "-50%"
+        }}
+        animate={{ scale: isHovering ? 0.5 : 1 }}
       />
     </>
   );
@@ -1004,8 +1061,15 @@ export default function App() {
       if (isMuted) {
         audioRef.current.pause();
       } else {
+        // Only attempt play if not muted and if we've had user interaction (which is guaranteed if loading screen is gone)
         audioRef.current.play().catch(err => console.log("Audio play failed:", err));
       }
+    }
+  }, [isMuted]);
+
+  const handleEnter = useCallback(() => {
+    if (audioRef.current && !isMuted) {
+      audioRef.current.play().catch(err => console.log("Audio play failed on enter:", err));
     }
   }, [isMuted]);
 
@@ -1038,7 +1102,7 @@ export default function App() {
       />
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <LoadingScreen />
+        <LoadingScreen onEnter={handleEnter} />
         <Navbar />
         <main>
           <Hero />
