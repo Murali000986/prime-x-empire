@@ -42,7 +42,7 @@ const Navbar = () => {
     { name: 'About', href: '#about' },
     { name: 'Features', href: '#features' },
     { name: 'Stats', href: '#stats' },
-    { name: 'Gallery', href: '#gallery' },
+    { name: 'Ventures', href: '#ventures' },
   ];
 
   return (
@@ -698,7 +698,109 @@ const Stats = () => {
   );
 };
 
-const Gallery = () => null; // Removed as per request to remove images
+const Ventures = () => {
+  const ventures = [
+    {
+      name: "Primecraft",
+      status: "Live",
+      image: "/pc.webp",
+      desc: "Primecraft is a Tamil public Minecraft server offering a unique and engaging community experience for players.",
+      features: ["Tamil Community Server", "Public Survival & Minigames", "Active Player Base"],
+      link: "https://discord.gg/QAkhwzeA",
+      buttonText: "View Primecraft",
+      color: "from-brand-purple to-purple-500"
+    },
+    {
+      name: "Pluto Hosting",
+      status: "Live",
+      image: "/pl.webp",
+      desc: "High-performance cloud hosting solutions tailored for developers and gamers. Providing low-latency, DDoS-protected infrastructure at scale.",
+      features: ["Game Server Hosting", "VPS & Dedicated Servers", "24/7 Technical Support"],
+      link: "https://discord.gg/ZDHQRDaFrk",
+      buttonText: "View Pluto Cloud",
+      color: "from-brand-blue to-cyan-400"
+    }
+  ];
+
+  return (
+    <section id="ventures" className="py-24 relative overflow-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-brand-blue/50 to-transparent" />
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter">
+            MY <span className="text-gradient neon-gradient uppercase">VENTURES</span>
+          </h2>
+          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto">
+            The brands and companies I've founded and currently lead.
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          {ventures.map((v, i) => (
+            <motion.div
+              key={v.name}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.2 }}
+              whileHover={{ y: -5 }}
+              className="glass p-8 md:p-10 rounded-3xl relative overflow-hidden group border-white/5 hover:border-brand-blue/30 transition-all duration-500"
+            >
+              <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-br ${v.color} opacity-5 blur-3xl group-hover:opacity-20 transition-opacity duration-500`} />
+              
+              <div className="flex justify-between items-start mb-8 relative z-10">
+                <div className="flex items-center gap-5">
+                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${v.color} p-[1px] shadow-lg`}>
+                    <div className="w-full h-full bg-zinc-950 rounded-[15px] overflow-hidden flex items-center justify-center">
+                      <img src={v.image} alt={`${v.name} Logo`} className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-white">{v.name}</h3>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                      <span className="text-xs font-bold tracking-widest uppercase text-emerald-500">{v.status}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-zinc-400 leading-relaxed mb-8 h-auto md:h-20 relative z-10 font-medium">
+                {v.desc}
+              </p>
+
+              <div className="space-y-4 mb-10 relative z-10">
+                {v.features.map((feat, idx) => (
+                  <div key={idx} className="flex items-center gap-3 text-zinc-300 font-medium bg-white/5 px-4 py-3 rounded-xl border border-white/5">
+                    <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${v.color}`} />
+                    {feat}
+                  </div>
+                ))}
+              </div>
+
+              <a
+                href={v.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`relative z-10 w-full py-4 rounded-xl bg-gradient-to-r from-brand-purple to-brand-blue p-[1px] group-hover:scale-[1.02] transition-transform block`}
+              >
+                <div className="w-full h-full bg-zinc-950/90 rounded-[11px] flex items-center justify-center gap-2 py-3 hover:bg-transparent transition-colors duration-300 text-white font-bold">
+                  {v.buttonText}
+                  <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </div>
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const OverRiser = () => {
   const profiles = [
@@ -1111,6 +1213,7 @@ export default function App() {
           <Stats />
           <FeaturesZone />
           <Rules />
+          <Ventures />
           <OverRiser />
           <CTA />
         </main>
