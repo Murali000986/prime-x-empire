@@ -225,7 +225,38 @@ const Hero = () => {
   );
 };
 
+const useDiscordStats = () => {
+  const [counts, setCounts] = useState({
+    members: 84, // Fallback
+    online: 51   // Fallback
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('https://discord.com/api/v9/invites/cd2nxHhAYD?with_counts=true');
+        const data = await response.json();
+        if (data.approximate_member_count && data.approximate_presence_count) {
+          setCounts({
+            members: data.approximate_member_count,
+            online: data.approximate_presence_count
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch Discord stats:", error);
+      }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return counts;
+};
+
 const About = () => {
+  const { members } = useDiscordStats();
   const containerVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { 
@@ -265,7 +296,7 @@ const About = () => {
           
           <div className="grid sm:grid-cols-3 gap-8">
             {[
-              { icon: <Users className="text-brand-blue" />, title: "5K+ Members", desc: "Active Community" },
+              { icon: <Users className="text-brand-blue" />, title: `${members} Members`, desc: "Active Community" },
               { icon: <Heart className="text-brand-purple" />, title: "Friendly", desc: "Toxic Free" },
               { icon: <Music className="text-brand-blue" />, title: "24/7 Music", desc: "Chill Vibes" }
             ].map((item, i) => (
@@ -604,32 +635,7 @@ const Features = () => {
 };
 
 const Stats = () => {
-  const [counts, setCounts] = useState({
-    members: 84, // Fallback
-    online: 51   // Fallback
-  });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('https://discord.com/api/v9/invites/cd2nxHhAYD?with_counts=true');
-        const data = await response.json();
-        if (data.approximate_member_count && data.approximate_presence_count) {
-          setCounts({
-            members: data.approximate_member_count,
-            online: data.approximate_presence_count
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch Discord stats:", error);
-      }
-    };
-
-    fetchStats();
-    // Refresh every 5 minutes
-    const interval = setInterval(fetchStats, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const counts = useDiscordStats();
 
   const stats = [
     { label: "Members Count", value: counts.members, suffix: "+" },
@@ -787,12 +793,10 @@ const Ventures = () => {
                 href={v.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`relative z-10 w-full py-4 rounded-xl bg-gradient-to-r from-brand-purple to-brand-blue p-[1px] group-hover:scale-[1.02] transition-transform block`}
+                className="relative z-10 w-full py-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/5 transition-colors duration-300 flex items-center justify-center gap-2 text-white font-bold group-hover:scale-[1.02]"
               >
-                <div className="w-full h-full bg-zinc-950/90 rounded-[11px] flex items-center justify-center gap-2 py-3 hover:bg-transparent transition-colors duration-300 text-white font-bold">
-                  {v.buttonText}
-                  <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </div>
+                {v.buttonText}
+                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </a>
             </motion.div>
           ))}
