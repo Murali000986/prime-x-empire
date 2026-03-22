@@ -82,7 +82,7 @@ const Navbar = () => {
             </motion.a>
           ))}
           <motion.a
-            href="https://discord.gg/527vn4uPFx"
+            href="https://discord.gg/cd2nxHhAYD"
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -123,7 +123,7 @@ const Navbar = () => {
               </a>
             ))}
             <a
-              href="https://discord.gg/527vn4uPFx"
+              href="https://discord.gg/cd2nxHhAYD"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-3 rounded-xl bg-brand-purple text-white text-center font-bold flex items-center justify-center gap-2"
@@ -199,7 +199,7 @@ const Hero = () => {
             <motion.a
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="https://discord.gg/527vn4uPFx"
+              href="https://discord.gg/cd2nxHhAYD"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-brand-purple text-white font-bold text-lg flex items-center justify-center gap-3 shadow-2xl shadow-brand-purple/40 group"
@@ -382,7 +382,7 @@ const FeaturesZone = () => {
               <motion.a
                 whileHover={{ scale: 1.05, x: 10 }}
                 whileTap={{ scale: 0.95 }}
-                href="https://discord.gg/527vn4uPFx"
+                href="https://discord.gg/cd2nxHhAYD"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-4 px-10 py-5 rounded-2xl bg-white text-black font-black text-xl shadow-2xl hover:shadow-white/20 transition-all group"
@@ -612,7 +612,7 @@ const Stats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('https://discord.com/api/v9/invites/2msTUW4D?with_counts=true');
+        const response = await fetch('https://discord.com/api/v9/invites/cd2nxHhAYD?with_counts=true');
         const data = await response.json();
         if (data.approximate_member_count && data.approximate_presence_count) {
           setCounts({
@@ -893,7 +893,7 @@ const CTA = () => {
           <motion.a
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            href="https://discord.gg/527vn4uPFx"
+            href="https://discord.gg/cd2nxHhAYD"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-4 px-12 py-6 rounded-2xl bg-brand-purple text-white font-black text-2xl shadow-2xl shadow-brand-purple/50 group"
